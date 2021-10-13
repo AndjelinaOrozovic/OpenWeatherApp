@@ -34,6 +34,11 @@ import { RoleRepository } from '../repositories/role';
 import { IRole } from '../db/models/role/role';
 import { UserRepository } from '../repositories/user';
 
+//moji importi
+import { Cities } from '../getCities/getCities';
+import { CityRepository } from '../repositories/city';
+
+
 const fileStreamRotator = require('file-stream-rotator');
 const busboy = require('connect-busboy');
 
@@ -90,6 +95,12 @@ export class Server {
     // start server
     server.startServer();
 
+    // myMethod start for getCities
+    server.getCitiesIntoBase();
+    // myMethod for newCity
+    //server.getNewCity();
+    
+
     return server;
   }
 
@@ -99,52 +110,67 @@ export class Server {
   }
 
   initFolderPaths() {
-    this.serverLogPath = join(__dirname, '../private', 'log', 'server');
-    this.httpLogPath = join(__dirname, '../private', 'log', 'http');
-    this.exportPath = join(__dirname, '../private', 'tmp', 'export');
+    this.serverLogPath = join(__dirname, "../private", "log", "server");
+    this.httpLogPath = join(__dirname, "../private", "log", "http");
+    this.exportPath = join(__dirname, "../private", "tmp", "export");
   }
 
   useHeaders() {
     const corsOptions = {
       origin: RegExp(this.environment.corsRegex),
-      credentials: true
+      credentials: true,
     };
 
     this.app.use(cors(corsOptions));
     this.app.use(helmet.frameguard());
-    this.app.options('*', cors(corsOptions));
+    this.app.options("*", <express.RequestHandler>cors(corsOptions));
 
     this.app.use(connectSlashes(false));
   }
 
   useBodyParser() {
-    this.app.use(bodyParser.urlencoded({
-      'extended': true
-    }));
+    this.app.use(
+      bodyParser.urlencoded({
+        extended: true,
+      })
+    );
     this.app.use(bodyParser.json());
-    this.app.use(bodyParser.text({
-      'type': 'text/plain'
-    }));
+    this.app.use(
+      bodyParser.text({
+        type: "text/plain",
+      })
+    );
   }
 
   useBusboy() {
-    this.app.use(busboy({
-      'limits': {
-        'fileSize': 10 * 1024 * 1024
-      }
-    }));
+    this.app.use(
+      busboy({
+        limits: {
+          fileSize: 10 * 1024 * 1024,
+        },
+      })
+    );
   }
 
   useMorgan() {
     const accessLogStream = fileStreamRotator.getStream({
-      'date_format': 'YYYY-MM-DD',
-      'filename': join(this.httpLogPath, '%DATE%.log'),
-      'frequency': 'daily',
-      'verbose': false
+      date_format: "YYYY-MM-DD",
+      filename: join(this.httpLogPath, "%DATE%.log"),
+      frequency: "daily",
+      verbose: false,
     });
 
-    this.app.use(morgan(':date[iso] - :method :url :status :res[content-length] B - :response-time ms'));
-    this.app.use(morgan(':date[iso] - :method :url :status :res[content-length] B - :response-time ms', { stream: accessLogStream }));
+    this.app.use(
+      morgan(
+        ":date[iso] - :method :url :status :res[content-length] B - :response-time ms"
+      )
+    );
+    this.app.use(
+      morgan(
+        ":date[iso] - :method :url :status :res[content-length] B - :response-time ms",
+        { stream: accessLogStream }
+      )
+    );
   }
 
   checkConnection() {
@@ -170,12 +196,17 @@ export class Server {
     const options: ServerOptions = {
       key: readFileSync(this.environment.keys.key),
       cert: readFileSync(this.environment.keys.cert),
-      passphrase: this.environment.keys.passphrase
+      passphrase: this.environment.keys.passphrase,
     };
 
-    createServer(options, <any>this.app).listen(this.environment.https.port, () => {
-      Logger.info(`NODE: HTTPS listening on port ${ this.environment.https.port }.`);
-    });
+    createServer(options, <any>this.app).listen(
+      this.environment.https.port,
+      () => {
+        Logger.info(
+          `NODE: HTTPS listening on port ${this.environment.https.port}.`
+        );
+      }
+    );
   }
 
   // create AuditLogger
@@ -185,18 +216,18 @@ export class Server {
 
   async createSystemUser(): Promise<void> {
     let system = await this.factories.user.model.findOne({
-      'isSystem': true
+      isSystem: true,
     });
 
     if (!system) {
       system = new this.factories.user.model();
-      system.email = 'system';
-      system.firstName = 'SYSTEM';
-      system.lastName = 'SYSTEM';
+      system.email = "system";
+      system.firstName = "SYSTEM";
+      system.lastName = "SYSTEM";
       system.isSystem = true;
       (<IUser>system).isDeleted = true;
       system.role = undefined;
-      system.status = 'active';
+      system.status = "active";
 
       await system.save();
     }
@@ -208,48 +239,115 @@ export class Server {
     const rr = new RoleRepository(this, this.systemUserId);
 
     let superAdminRole = await rr.databaseModel.findOne({
-      'type': 'SUPER_ADMIN'
+      type: "SUPER_ADMIN",
     });
 
     if (!superAdminRole) {
-      superAdminRole = await rr.create(role => {
-        role.type = 'SUPER_ADMIN';
-        role.description = 'Super administrator';
+      superAdminRole = await rr.create((role) => {
+        role.type = "SUPER_ADMIN";
+        role.description = "Super administrator";
         role.permissions = permissions;
       });
     } else {
-      superAdminRole = await rr.update(superAdminRole._id.toString(), role => {
-        role.permissions = permissions;
-      });
+      superAdminRole = await rr.update(
+        superAdminRole._id.toString(),
+        (role) => {
+          role.permissions = permissions;
+        }
+      );
     }
 
     return superAdminRole;
   }
 
+  //popunjavanje baze
+  async getCitiesIntoBase() {
+    try {
+    const cr = new CityRepository(this);
+    const cityData = new Cities();
+    const dbCities = await cr.query();
+  
+      while ( dbCities.length < 10 ) {
+        const dbCities = await cr.query();
+        if (dbCities.length == 10) //ne smijemo dozvoliti da se nula posalje, jer je najmanji broj koji se moze slati cnt 1
+        {
+          break;
+        }
+        const numberOfCities = 10 - dbCities.length;
+        const cities = await cityData.getCities(numberOfCities);
+
+        for (const cityFromArray of cities.list) {
+          //cities.list jer treba da je iterabilno, da prodjemo for petljom
+          await cr.create((city) => {
+            city.id = cityFromArray.id;
+            city.name = cityFromArray.name;
+            city.coord = cityFromArray.coord;
+            city.main = cityFromArray.main;
+            city.dt = cityFromArray.dt;
+            city.wind = cityFromArray.wind;
+            city.sys = cityFromArray.sys;
+            city.rain = cityFromArray.rain;
+            city.snow = cityFromArray.snow;
+            city.clouds = cityFromArray.clouds;
+            city.weather = cityFromArray.weather[0];
+          });
+        }
+      }
+       } catch(error) {}
+  }
+
+  // //dobavljanje novog grada
+  // async getNewCity() {
+  //   try {
+  //     const cr = new CityRepository(this);
+  //     const cityData = new Cities();
+  //     const newCity = await cityData.newCity("beograd");
+  //     await cr.create((city) => {
+  //       city.id = newCity.id;
+  //       city.name = newCity.name;
+  //       city.coord = newCity.coord;
+  //       city.main = newCity.main;
+  //       city.dt = newCity.dt;
+  //       city.wind = newCity.wind;
+  //       city.sys = newCity.sys;
+  //       city.rain = newCity.rain;
+  //       city.snow = newCity.snow;
+  //       city.clouds = newCity.clouds;
+  //       city.weather = newCity.weather[0];
+  //       console.log(city);
+  //     });
+  //     console.log(newCity);
+  //   } catch (error) {}
+  // }
+
   async upsertSuperAdminUser(superAdminRole: Document & IRole) {
     const ur = new UserRepository(this, this.systemUserId);
 
     const admin = await ur.databaseModel.findOne({
-      'isAdmin': true
+      isAdmin: true,
     });
 
     if (!admin) {
-      await ur.create(user => {
+      await ur.create((user) => {
         user.email = this.environment.superAdmin.email;
         user.firstName = this.environment.superAdmin.firstName;
         user.lastName = this.environment.superAdmin.lastName;
-        user.passwordHash = Util.generateHash(this.environment.superAdmin.password);
-        user.status = 'active';
+        user.passwordHash = Util.generateHash(
+          this.environment.superAdmin.password
+        );
+        user.status = "active";
         user.isAdmin = true;
         user.role = superAdminRole._id.toString();
       });
     } else {
-      await ur.update(admin._id.toString(), user => {
+      await ur.update(admin._id.toString(), (user) => {
         user.email = this.environment.superAdmin.email;
         user.firstName = this.environment.superAdmin.firstName;
         user.lastName = this.environment.superAdmin.lastName;
-        user.passwordHash = Util.generateHash(this.environment.superAdmin.password);
-        user.status = 'active';
+        user.passwordHash = Util.generateHash(
+          this.environment.superAdmin.password
+        );
+        user.status = "active";
       });
     }
   }
