@@ -296,30 +296,6 @@ export class Server {
        } catch(error) {}
   }
 
-  // //dobavljanje novog grada
-  // async getNewCity() {
-  //   try {
-  //     const cr = new CityRepository(this);
-  //     const cityData = new Cities();
-  //     const newCity = await cityData.newCity("beograd");
-  //     await cr.create((city) => {
-  //       city.id = newCity.id;
-  //       city.name = newCity.name;
-  //       city.coord = newCity.coord;
-  //       city.main = newCity.main;
-  //       city.dt = newCity.dt;
-  //       city.wind = newCity.wind;
-  //       city.sys = newCity.sys;
-  //       city.rain = newCity.rain;
-  //       city.snow = newCity.snow;
-  //       city.clouds = newCity.clouds;
-  //       city.weather = newCity.weather[0];
-  //       console.log(city);
-  //     });
-  //     console.log(newCity);
-  //   } catch (error) {}
-  // }
-
   async upsertSuperAdminUser(superAdminRole: Document & IRole) {
     const ur = new UserRepository(this, this.systemUserId);
 
