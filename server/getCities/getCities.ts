@@ -25,8 +25,8 @@ export class Cities {
     }
  }
 
- //metod za dohvatanje jednog grada
- async getOneCity(nameOfCity: string) { //getByName
+ //getByName
+ async getOneCity(nameOfCity: string) { 
   try {
     const options = {
       method: 'GET'
@@ -41,7 +41,7 @@ export class Cities {
     }
  }
 
- //metod za dohvatanje jednog grada po id-u
+ //getById
  async getOneCityById(idOfCity: number) {
   try {
     const options = {
