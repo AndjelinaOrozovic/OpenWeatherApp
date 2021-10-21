@@ -95,11 +95,8 @@ export class Server {
     // start server
     server.startServer();
 
-    // myMethod start for getCities
+    // myMethod for getCities
     server.getCitiesIntoBase();
-    // myMethod for newCity
-    //server.getNewCity();
-    
 
     return server;
   }
@@ -277,7 +274,6 @@ export class Server {
         const cities = await cityData.getCities(numberOfCities);
 
         for (const cityFromArray of cities.list) {
-          //cities.list jer treba da je iterabilno, da prodjemo for petljom
           await cr.create((city) => {
             city.id = cityFromArray.id;
             city.name = cityFromArray.name;
@@ -293,7 +289,13 @@ export class Server {
           });
         }
       }
-       } catch(error) {}
+       } catch(error) {
+         console.log(error);
+       }
+  }
+
+  async updateCity() {
+    
   }
 
   async upsertSuperAdminUser(superAdminRole: Document & IRole) {

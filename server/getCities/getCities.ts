@@ -2,6 +2,8 @@ const request = require('request-promise-native');
 
 const API_KEY = 'f785820ced60a6fd3537887c11fa4195';
 
+const API = 'http://api.openweathermap.org/data/2.5/';
+
 
 export class Cities {
 
@@ -12,7 +14,7 @@ export class Cities {
     try {
     const options = {
       method: 'GET'
-      ,url: `http://api.openweathermap.org/data/2.5/find?lat=${latitude}&lon=${longitude}&cnt=${numberOfCities}&appid=${API_KEY}&units=metric`
+      ,url: `${API}find?lat=${latitude}&lon=${longitude}&cnt=${numberOfCities}&appid=${API_KEY}&units=metric`
       ,json: true
     }
     const cities = await request(options);
@@ -28,7 +30,23 @@ export class Cities {
   try {
     const options = {
       method: 'GET'
-      ,url: `https://api.openweathermap.org/data/2.5/weather?q=${nameOfCity}&appid=${API_KEY}&units=metric`
+      ,url: `${API}weather?q=${nameOfCity}&appid=${API_KEY}&units=metric`
+      ,json: true
+    }
+    const newCity = await request(options);
+    return newCity;
+    } catch(error)
+    {
+      console.log(error);
+    }
+ }
+
+ //metod za dohvatanje jednog grada po id-u
+ async getOneCityById(idOfCity: number) {
+  try {
+    const options = {
+      method: 'GET'
+      ,url: `${API}weather?id=${idOfCity}&appid=${API_KEY}&units=metric`
       ,json: true
     }
     const newCity = await request(options);

@@ -16,8 +16,8 @@ export class CityRouter extends Router {
   initRoutes() {
     this.router.route('/')
       .get(this.queryAll.bind(this))
-      .post(this.createNewCity.bind(this)); // mozemo razdvojiti u novu rutu '/newcity' ali ovdje post ne smeta get-u, pa smo ih stavili zajedno
-    this.router.route('/search')  //dodajemo novu rutu, za search
+      .post(this.createNewCity.bind(this));
+    this.router.route('/search')
       .get(this.getCity.bind(this));
   }
 
@@ -37,11 +37,6 @@ export class CityRouter extends Router {
       const cr = new CityRepository(this.server);
       const city = request.body;
 
-      //metoda za upis samo imena grada u bazu
-      // const newCity = await cr.create((cityNew) => {
-      //   cityNew.name = city.name;
-      // });
-
       const newCity =  await cr.create((newCity) => {
               newCity.id = city.id;
               newCity.name = city.name;
@@ -50,8 +45,6 @@ export class CityRouter extends Router {
               newCity.dt = city.dt;
               newCity.wind = city.wind;
               newCity.sys = city.sys;
-              //city.rain = newCity.rain;
-              //city.snow = newCity.snow;
               newCity.clouds = city.clouds;
               newCity.weather = city.weather[0];
             });
@@ -69,9 +62,6 @@ export class CityRouter extends Router {
     const cityName = request.query.newCity;
     const cityData = new Cities();
     const oneCity = await cityData.getOneCity(<string>cityName);
-    // if(!oneCity) { 
-    //   response.data = [];
-    // } else response.data = [oneCity];
     response.data = oneCity ? [oneCity] : [];
     next();
     } catch (error) {
