@@ -311,8 +311,6 @@ export class Server {
         updatedCity.clouds = city.clouds;
         updatedCity.weather = city.weather;
       })
-      console.log("==============================================================\n");
-      console.log(city);
     }
 
   }
