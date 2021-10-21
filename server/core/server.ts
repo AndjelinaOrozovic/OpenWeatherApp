@@ -99,7 +99,7 @@ export class Server {
     server.getCitiesIntoBase();
     
     //cronjob
-    server.cronjobFunction();
+    server.initUpdateCitiesCronjob();
 
     return server;
   }
@@ -315,12 +315,11 @@ export class Server {
 
   }
 
-  cronjobFunction() {
+  initUpdateCitiesCronjob() {
     cron.schedule('0 */20 * * * *', () => {
       this.updateCities();
     });
   }
-
 
   async upsertSuperAdminUser(superAdminRole: Document & IRole) {
     const ur = new UserRepository(this, this.systemUserId);

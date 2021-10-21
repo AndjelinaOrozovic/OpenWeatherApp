@@ -1,13 +1,10 @@
 const request = require('request-promise-native');
 
 const API_KEY = 'f785820ced60a6fd3537887c11fa4195';
-
 const API = 'http://api.openweathermap.org/data/2.5/';
-
 
 export class Cities {
 
- //metod za dohvatanje 10 gradova
  async getCities(numberOfCities: number) {
   const latitude = Math.floor(Math.random() * (Math.floor(55) - Math.ceil(34) + 1)) + Math.ceil(34);
   const longitude = Math.floor(Math.random() * (Math.floor(16) - Math.ceil(101) + 1)) + Math.ceil(101);
@@ -25,7 +22,6 @@ export class Cities {
     }
  }
 
- //getByName
  async getOneCityByName(nameOfCity: string) { 
   try {
     const options = {
@@ -41,7 +37,6 @@ export class Cities {
     }
  }
 
- //getById
  async getOneCityById(idOfCity: number) {
   try {
     const options = {

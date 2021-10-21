@@ -9,7 +9,6 @@ import { Snow } from '../../../getCities/weatherDatas';
 import { Clouds } from '../../../getCities/weatherDatas';
 import { Weather } from '../../../getCities/weatherDatas';
 
-
 export interface ICity extends IIdentifier, ISoftDelete, IAuditInfo {
     id: number;
     name: string;

@@ -30,6 +30,19 @@ export class CityRouter extends Router {
       next(Router.handleError(error, request, response));
     }
   }
+  
+  async getCity(request: IRequest, response: IResponse, next: NextFunction) 
+  {
+    try {
+    const cityName = request.query.newCity;
+    const cityData = new Cities();
+    const oneCity = await cityData.getOneCityByName(<string>cityName);
+    response.data = oneCity ? [oneCity] : [];
+    next();
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   async createNewCity(request: IRequest, response: IResponse, next: NextFunction) {
     try {
@@ -53,19 +66,6 @@ export class CityRouter extends Router {
       next();
     } catch (error) {
       next(Router.handleError(error, request, response));
-    }
-  }
-
-  async getCity(request: IRequest, response: IResponse, next: NextFunction) 
-  {
-    try {
-    const cityName = request.query.newCity;
-    const cityData = new Cities();
-    const oneCity = await cityData.getOneCityByName(<string>cityName);
-    response.data = oneCity ? [oneCity] : [];
-    next();
-    } catch (error) {
-      console.log(error);
     }
   }
 
