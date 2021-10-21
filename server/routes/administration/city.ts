@@ -61,7 +61,7 @@ export class CityRouter extends Router {
     try {
     const cityName = request.query.newCity;
     const cityData = new Cities();
-    const oneCity = await cityData.getOneCity(<string>cityName);
+    const oneCity = await cityData.getOneCityByName(<string>cityName);
     response.data = oneCity ? [oneCity] : [];
     next();
     } catch (error) {

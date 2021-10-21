@@ -26,7 +26,7 @@ export class Cities {
  }
 
  //getByName
- async getOneCity(nameOfCity: string) { 
+ async getOneCityByName(nameOfCity: string) { 
   try {
     const options = {
       method: 'GET'
