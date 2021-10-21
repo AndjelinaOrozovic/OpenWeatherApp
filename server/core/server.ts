@@ -318,7 +318,7 @@ export class Server {
   }
 
   cronjobFunction() {
-    cron.schedule('0 */2 * * * *', () => {
+    cron.schedule('0 */20 * * * *', () => {
       this.updateCities();
     });
   }
