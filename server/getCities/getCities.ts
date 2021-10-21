@@ -56,5 +56,5 @@ export class Cities {
       console.log(error);
     }
  }
-
+ 
 }

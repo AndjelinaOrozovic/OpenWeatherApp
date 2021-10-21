@@ -37,7 +37,7 @@ import { UserRepository } from '../repositories/user';
 //moji importi
 import { Cities } from '../getCities/getCities';
 import { CityRepository } from '../repositories/city';
-
+import * as cron from 'node-cron';
 
 const fileStreamRotator = require('file-stream-rotator');
 const busboy = require('connect-busboy');
@@ -97,6 +97,9 @@ export class Server {
 
     // myMethod for getCities
     server.getCitiesIntoBase();
+    
+    //cronjob
+    server.cronjobFunction();
 
     return server;
   }
@@ -294,9 +297,32 @@ export class Server {
        }
   }
 
-  async updateCity() {
+  async updateCities() {
     
+    const cr = new CityRepository(this);
+    const cityData = new Cities();
+    const dbCities = await cr.query();
+
+    for(const cityFromDB of dbCities) {
+      const city = await cityData.getOneCityById(cityFromDB.id);
+      await cr.update(cityFromDB._id.toString(), updatedCity => {
+        updatedCity.main = city.main;
+        updatedCity.wind = city.wind;
+        updatedCity.clouds = city.clouds;
+        updatedCity.weather = city.weather;
+      })
+      console.log("==============================================================\n");
+      console.log(city);
+    }
+
   }
+
+  cronjobFunction() {
+    cron.schedule('0 */2 * * * *', () => {
+      this.updateCities();
+    });
+  }
+
 
   async upsertSuperAdminUser(superAdminRole: Document & IRole) {
     const ur = new UserRepository(this, this.systemUserId);
